@@ -6,14 +6,14 @@ import { getDatabase } from "firebase/database";
 import { getAnalytics, isSupported } from "firebase/analytics";
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyCmzj4n1l7P6Ob6oYvKRtLZuiriN3tf16c",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "",
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "crackersfalls-2026.firebaseapp.com",
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "crackersfalls-2026",
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "crackersfalls-2026.firebasestorage.app",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "427626948160",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:427626948160:web:72a4091de64968aec0e1a5",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "",
   databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || "https://crackersfalls-2026-default-rtdb.asia-southeast1.firebasedatabase.app",
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-CQLJ1Y6BHQ"
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || ""
 };
 
 // Initialize Firebase App instance

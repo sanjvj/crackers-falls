@@ -2,12 +2,12 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDhNLYo_UuFHTG-syCgaaglOec_0kFPY68",
-  authDomain: "crackerfalls.firebaseapp.com",
-  projectId: "crackerfalls",
-  storageBucket: "crackerfalls.firebasestorage.app",
-  messagingSenderId: "627062783163",
-  appId: "1:627062783163:web:bc478c90954d6489873d9e"
+  apiKey: process.env.VITE_FIREBASE_API_KEY || "",
+  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN || "crackersfalls-2026.firebaseapp.com",
+  projectId: process.env.VITE_FIREBASE_PROJECT_ID || "crackersfalls-2026",
+  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET || "crackersfalls-2026.firebasestorage.app",
+  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "",
+  appId: process.env.VITE_FIREBASE_APP_ID || ""
 };
 
 const app = initializeApp(firebaseConfig);
@@ -36,42 +36,19 @@ const SEED_PRODUCTS = [
   // Flower Pots
   { id: 'p3', name: 'Flower Pots Small 10 Pcs', category: 'Flower Pots', brand: 'Crackers Falls', unit: 'Box', price: 120, original_price: 270, image_url: '/crackers falls logo.webp', description: 'Golden spark fountains', in_stock: true, active: true, sortOrder: 2 },
   { id: 'p4', name: 'Flower Pots Big 10 Pcs', category: 'Flower Pots', brand: 'Crackers Falls', unit: 'Box', price: 195, original_price: 430, image_url: '/crackers falls logo.webp', description: 'High spraying golden sparkle pot', in_stock: true, active: true, sortOrder: 3 },
-  { id: 'p5', name: 'Flower Pots Special Multicolor', category: 'Flower Pots', brand: 'Crackers Falls', unit: 'Box', price: 280, original_price: 620, image_url: '/crackers falls logo.webp', description: 'Multi-stage color fountain pot', in_stock: true, active: true, sortOrder: 4 },
-
-  // Sparklers
-  { id: 'p6', name: '10cm Electric Sparklers (10 Pcs)', category: 'Sparklers', brand: 'Crackers Falls', unit: 'Box', price: 35, original_price: 80, image_url: '/crackers falls logo.webp', description: 'Bright golden sparkler sticks', in_stock: true, active: true, sortOrder: 5 },
-  { id: 'p7', name: '15cm Green Sparklers (10 Pcs)', category: 'Sparklers', brand: 'Crackers Falls', unit: 'Box', price: 55, original_price: 120, image_url: '/crackers falls logo.webp', description: 'Vibrant green emission sparklers', in_stock: true, active: true, sortOrder: 6 },
-  { id: 'p8', name: '30cm Electric Sparklers (5 Pcs)', category: 'Sparklers', brand: 'Crackers Falls', unit: 'Box', price: 95, original_price: 210, image_url: '/crackers falls logo.webp', description: 'Long duration giant sparklers', in_stock: true, active: true, sortOrder: 7 },
-
-  // Bombs
-  { id: 'p9', name: 'Atom Bomb Green (10 Pcs)', category: 'Bombs', brand: 'Crackers Falls', unit: 'Box', price: 85, original_price: 190, image_url: '/crackers falls logo.webp', description: 'High intensity sound bomb', in_stock: true, active: true, sortOrder: 8 },
-  { id: 'p10', name: 'Hydrogen Bomb Deluxe', category: 'Bombs', brand: 'Crackers Falls', unit: 'Box', price: 160, original_price: 360, image_url: '/crackers falls logo.webp', description: 'Super loud sound explosion', in_stock: true, active: true, sortOrder: 9 },
-
-  // Sky Shots & Rockets
-  { id: 'p11', name: 'Whistling Rocket (5 Pcs)', category: 'Rockets', brand: 'Crackers Falls', unit: 'Box', price: 135, original_price: 300, image_url: '/crackers falls logo.webp', description: 'Whistling sound aerial sky launch', in_stock: true, active: true, sortOrder: 10 },
-  { id: 'p12', name: '12 Shot Multi Color Sky Display', category: 'Sky Shots', brand: 'Crackers Falls', unit: 'Box', price: 380, original_price: 850, image_url: '/crackers falls logo.webp', description: 'Continuous 12 multi-color aerial bursts', in_stock: true, active: true, sortOrder: 11 },
-  { id: 'p13', name: '30 Shot Aerial Spectacular', category: 'Sky Shots', brand: 'Crackers Falls', unit: 'Box', price: 950, original_price: 2100, image_url: '/crackers falls logo.webp', description: 'Grand fireworks finale display', in_stock: true, active: true, sortOrder: 12 },
-
-  // Gift Boxes
-  { id: 'p14', name: 'Diwali Grand Family Gift Box (25 Items)', category: 'Gift Boxes', brand: 'Crackers Falls', unit: 'Box', price: 1450, original_price: 3200, image_url: '/crackers falls logo.webp', description: 'Assorted family gift box containing sparklers, pots, chakkars & sky shots', in_stock: true, active: true, sortOrder: 13 }
+  { id: 'p5', name: 'Flower Pots Special Multicolor', category: 'Flower Pots', brand: 'Crackers Falls', unit: 'Box', price: 280, original_price: 620, image_url: '/crackers falls logo.webp', description: 'Multi-stage color fountain pot', in_stock: true, active: true, sortOrder: 4 }
 ];
 
 async function seed() {
-  console.log('🌱 Seeding Sivakasi Categories to Firestore...');
-  for (const cat of SEED_CATEGORIES) {
-    await setDoc(doc(db, 'categories', cat.id), cat, { merge: true });
+  console.log('Seeding categories...');
+  for (const c of SEED_CATEGORIES) {
+    await setDoc(doc(db, 'categories', c.id), c);
   }
-
-  console.log('🌱 Seeding Products to Firestore...');
-  for (const prod of SEED_PRODUCTS) {
-    await setDoc(doc(db, 'products', prod.id), prod, { merge: true });
+  console.log('Seeding products...');
+  for (const p of SEED_PRODUCTS) {
+    await setDoc(doc(db, 'products', p.id), p);
   }
-
-  console.log('✅ SEEDING COMPLETE!');
-  process.exit(0);
+  console.log('Seeding completed!');
 }
 
-seed().catch(err => {
-  console.error('Seeding error:', err);
-  process.exit(1);
-});
+seed().catch(console.error);
