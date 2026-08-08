@@ -1,0 +1,54 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    // Public catalog collections (read-only for public, write for admin)
+    match /products/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /categories/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /testimonials/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /coupons/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /site_content/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Enquiries: public create with validation, admin-only read/update/delete
+    match /enquiries/{enquiryId} {
+      allow create: if request.resource.data.keys().hasAll(['name', 'phone', 'items', 'created_at'])
+        && request.resource.data.name is string && request.resource.data.name.size() <= 100
+        && request.resource.data.phone is string && request.resource.data.phone.matches('^[0-9+\\s-]{10,15}$')
+        && (!('email' in request.resource.data) || request.resource.data.email is string && request.resource.data.email.size() <= 100)
+        && (!('pincode' in request.resource.data) || request.resource.data.pincode is string && request.resource.data.pincode.matches('^[0-9]{6}$'));
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Admin-only collections
+    match /admin_users/{userId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /activity_logs/{logId} {
+      allow read, write: if isAdmin();
+    }
+  }
+}
