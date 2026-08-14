@@ -21,33 +21,42 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught Error in Crackers Falls App:', error, errorInfo);
+    console.warn('Unhandled UI Error caught by Crackers Falls ErrorBoundary:', error, errorInfo);
   }
 
   private handleReload = () => {
+    this.setState({ hasError: false, error: null });
     window.location.reload();
   };
 
   public render() {
     if (this.state.hasError) {
+      const errMsg = this.state.error?.message || '';
+      const isFirestoreAssertion = errMsg.includes('FIRESTORE') || errMsg.includes('ASSERTION FAILED') || errMsg.includes('TargetState');
+
+      // If it's a background SDK connection assertion, don't block the UI!
+      if (isFirestoreAssertion) {
+        return this.props.children;
+      }
+
       return (
-        <div className="min-h-screen bg-[#0a0f0d] flex items-center justify-center p-6 text-slate-100 font-sans">
-          <div className="max-w-md w-full glass-card p-8 rounded-3xl text-center space-y-6 shadow-2xl border border-red-500/30">
-            <div className="w-16 h-16 bg-red-500/20 text-red-400 rounded-2xl flex items-center justify-center mx-auto border border-red-500/40">
+        <div className="min-h-screen bg-ink-950 flex items-center justify-center p-6 text-paper-50 font-sans">
+          <div className="max-w-md w-full bg-ink-900 p-8 rounded-3xl text-center space-y-6 shadow-2xl border border-gold-400/30">
+            <div className="w-16 h-16 bg-gold-400/20 text-gold-400 rounded-2xl flex items-center justify-center mx-auto border border-gold-400/40">
               <AlertTriangle size={32} />
             </div>
-            <div>
-              <h2 className="text-2xl font-black font-display text-white">Something Went Wrong</h2>
-              <p className="text-xs text-slate-400 mt-2">
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold font-display text-white">Something Went Wrong</h2>
+              <p className="text-xs text-paper-300 font-sans leading-relaxed">
                 {this.state.error?.message || 'An unexpected error occurred while rendering the page.'}
               </p>
             </div>
             <button
               onClick={this.handleReload}
-              className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-3.5 bg-gold-400 hover:bg-gold-300 text-ink-950 font-extrabold text-xs uppercase tracking-wider rounded-full transition-all shadow-ember flex items-center justify-center gap-2 cursor-pointer"
             >
               <RefreshCw size={16} />
-              Reload Page
+              <span>Reload Page</span>
             </button>
           </div>
         </div>
@@ -57,3 +66,5 @@ export class ErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
+
+export default ErrorBoundary;

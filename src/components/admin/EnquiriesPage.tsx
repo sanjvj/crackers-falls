@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Eye, MessageSquare, X } from 'lucide-react';
+import { Search, Eye, MessageSquare, X, Mail } from 'lucide-react';
 import { updateEnquiryStatus } from '../../lib/firestore';
 import type { Enquiry } from '../../types';
 
@@ -16,6 +16,8 @@ export const EnquiriesPage: React.FC<EnquiriesPageProps> = ({ enquiries }) => {
   const [transportName, setTransportName] = useState('');
   const [lrNumber, setLrNumber] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [resendStatus, setResendStatus] = useState('');
 
   const filteredEnquiries = enquiries.filter(e => {
     const matchesSearch = e.name.toLowerCase().includes(searchTerm.toLowerCase()) || e.phone.includes(searchTerm) || (e.id || '').toLowerCase().includes(searchTerm.toLowerCase());
@@ -28,6 +30,25 @@ export const EnquiriesPage: React.FC<EnquiriesPageProps> = ({ enquiries }) => {
     setNewStatus(e.status || 'Pending');
     setTransportName(e.transport_name || '');
     setLrNumber(e.lr_number || '');
+    setResendStatus('');
+  };
+
+  const handleResendEmail = async (orderId: string) => {
+    setIsResending(true);
+    setResendStatus('');
+    try {
+      const res = await fetch(`https://us-central1-crackersfalls-2026.cloudfunctions.net/resendEnquiryEmail?orderId=${orderId}`);
+      const data = await res.json();
+      if (data.success) {
+        setResendStatus('Confirmation email & PDF resent successfully!');
+      } else {
+        setResendStatus(`Resend Error: ${data.error || 'Failed to send'}`);
+      }
+    } catch (err: any) {
+      setResendStatus(`Resend Error: ${err.message}`);
+    } finally {
+      setIsResending(false);
+    }
   };
 
   const handleUpdateStatus = async () => {
@@ -202,10 +223,28 @@ export const EnquiriesPage: React.FC<EnquiriesPageProps> = ({ enquiries }) => {
               <button
                 onClick={handleUpdateStatus}
                 disabled={isUpdating}
-                className="w-full py-3.5 bg-gold-400 hover:bg-gold-300 text-ink-950 font-extrabold uppercase tracking-wider rounded-full shadow-ember mt-3 cursor-pointer transition-all"
+                className="w-full py-3 bg-gold-400 hover:bg-gold-300 text-ink-950 font-extrabold uppercase tracking-wider rounded-full shadow-ember mt-2 cursor-pointer transition-all"
               >
                 {isUpdating ? 'Saving Workflow Status...' : 'Save Order Status & Tracking'}
               </button>
+
+              <div className="pt-2 border-t border-paper-50/10 space-y-2">
+                <button
+                  type="button"
+                  onClick={() => handleResendEmail(selectedEnquiry.id)}
+                  disabled={isResending}
+                  className="w-full py-2.5 bg-ink-850 hover:bg-ink-800 border border-gold-400/30 text-gold-300 font-bold text-xs rounded-2xl flex items-center justify-center gap-2 cursor-pointer transition-all"
+                >
+                  <Mail size={14} />
+                  <span>{isResending ? 'Resending Confirmation Email...' : 'Resend Confirmation Email & PDF'}</span>
+                </button>
+
+                {resendStatus && (
+                  <div className={`p-2.5 rounded-xl text-[11px] font-bold text-center ${resendStatus.includes('Error') ? 'bg-crimson-500/20 text-crimson-400 border border-crimson-500/30' : 'bg-leaf-400/20 text-leaf-400 border border-leaf-400/30'}`}>
+                    {resendStatus}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

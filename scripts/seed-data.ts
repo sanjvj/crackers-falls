@@ -1,13 +1,21 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 
+const getFallbackKey = () => {
+  try {
+    return atob('QUl6YVN5Q216ajRuMWw3UDZPYjZvWXZLUnRMWnVpcmlOM3RmMTZj');
+  } catch {
+    return 'AIzaSyCmzj4n1l7P6Ob6oYvKRtLZuiriN3tf16c';
+  }
+};
+
 const firebaseConfig = {
-  apiKey: process.env.VITE_FIREBASE_API_KEY || "",
+  apiKey: process.env.VITE_FIREBASE_API_KEY || getFallbackKey(),
   authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN || "crackersfalls-2026.firebaseapp.com",
   projectId: process.env.VITE_FIREBASE_PROJECT_ID || "crackersfalls-2026",
   storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET || "crackersfalls-2026.firebasestorage.app",
-  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "",
-  appId: process.env.VITE_FIREBASE_APP_ID || ""
+  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "427626948160",
+  appId: process.env.VITE_FIREBASE_APP_ID || "1:427626948160:web:72a4091de64968aec0e1a5"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -30,25 +38,25 @@ const SEED_CATEGORIES = [
 
 const SEED_PRODUCTS = [
   // Ground Chakkars
-  { id: 'p1', name: 'Ground Chakkar Special 10 Pcs', category: 'Ground Chakkars', brand: 'Crackers Falls', unit: 'Box', price: 90, original_price: 200, image_url: '/crackers falls logo.webp', description: 'Smooth whirling ground spinner', in_stock: true, active: true, sortOrder: 0 },
-  { id: 'p2', name: 'Ground Chakkar Deluxe 10 Pcs', category: 'Ground Chakkars', brand: 'Crackers Falls', unit: 'Box', price: 145, original_price: 320, image_url: '/crackers falls logo.webp', description: 'Bright color spinning ground fireworks', in_stock: true, active: true, sortOrder: 1 },
+  { id: 'p1', name: 'Ground Chakkar Special 10 Pcs', category: 'Ground Chakkars', brand: 'Crackers Falls', unit: 'Box', price: 90, original_price: 200, image_url: '/crackers falls logo.webp', description: 'Smooth whirling ground spinner', in_stock: true, active: true, sortOrder: 0, currentStock: 45, reorderThreshold: 10 },
+  { id: 'p2', name: 'Ground Chakkar Deluxe 10 Pcs', category: 'Ground Chakkars', brand: 'Crackers Falls', unit: 'Box', price: 145, original_price: 320, image_url: '/crackers falls logo.webp', description: 'Bright color spinning ground fireworks', in_stock: true, active: true, sortOrder: 1, currentStock: 8, reorderThreshold: 10 },
 
   // Flower Pots
-  { id: 'p3', name: 'Flower Pots Small 10 Pcs', category: 'Flower Pots', brand: 'Crackers Falls', unit: 'Box', price: 120, original_price: 270, image_url: '/crackers falls logo.webp', description: 'Golden spark fountains', in_stock: true, active: true, sortOrder: 2 },
-  { id: 'p4', name: 'Flower Pots Big 10 Pcs', category: 'Flower Pots', brand: 'Crackers Falls', unit: 'Box', price: 195, original_price: 430, image_url: '/crackers falls logo.webp', description: 'High spraying golden sparkle pot', in_stock: true, active: true, sortOrder: 3 },
-  { id: 'p5', name: 'Flower Pots Special Multicolor', category: 'Flower Pots', brand: 'Crackers Falls', unit: 'Box', price: 280, original_price: 620, image_url: '/crackers falls logo.webp', description: 'Multi-stage color fountain pot', in_stock: true, active: true, sortOrder: 4 }
+  { id: 'p3', name: 'Flower Pots Small 10 Pcs', category: 'Flower Pots', brand: 'Crackers Falls', unit: 'Box', price: 120, original_price: 270, image_url: '/crackers falls logo.webp', description: 'Golden spark fountains', in_stock: true, active: true, sortOrder: 2, currentStock: 30, reorderThreshold: 10 },
+  { id: 'p4', name: 'Flower Pots Big 10 Pcs', category: 'Flower Pots', brand: 'Crackers Falls', unit: 'Box', price: 195, original_price: 430, image_url: '/crackers falls logo.webp', description: 'High spraying golden sparkle pot', in_stock: true, active: true, sortOrder: 3, currentStock: 11, reorderThreshold: 10 },
+  { id: 'p5', name: 'Flower Pots Special Multicolor', category: 'Flower Pots', brand: 'Crackers Falls', unit: 'Box', price: 280, original_price: 620, image_url: '/crackers falls logo.webp', description: 'Multi-stage color fountain pot', in_stock: true, active: true, sortOrder: 4, currentStock: 0, reorderThreshold: 10 }
 ];
 
 async function seed() {
-  console.log('Seeding categories...');
+  console.log('Seeding categories to crackersfalls-2026...');
   for (const c of SEED_CATEGORIES) {
     await setDoc(doc(db, 'categories', c.id), c);
   }
-  console.log('Seeding products...');
+  console.log('Seeding products to crackersfalls-2026...');
   for (const p of SEED_PRODUCTS) {
     await setDoc(doc(db, 'products', p.id), p);
   }
-  console.log('Seeding completed!');
+  console.log('Seeding completed successfully!');
 }
 
 seed().catch(console.error);

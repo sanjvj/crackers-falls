@@ -23,7 +23,8 @@ import type {
   MasterSettings,
   SafetyTipsContent,
   AboutPageContent,
-  ContactPageContent
+  ContactPageContent,
+  StockLedgerEntry
 } from '../types';
 
 // Default initial fallbacks
@@ -175,7 +176,8 @@ export const DEFAULT_MASTER_SETTINGS: MasterSettings = {
   minimum_order_value: 2000,
   whatsapp_number: '919159038240',
   phone_number: '+919159038240',
-  support_email: 'support@crackersfalls.in'
+  support_email: 'support@crackersfalls.in',
+  admin_notification_email: 'sanjaysurya3010@gmail.com'
 };
 
 // Local storage override helpers to guarantee admin edits always succeed even if Firebase permissions fail
@@ -425,6 +427,24 @@ export async function deleteCategory(id: string): Promise<void> {
   } catch (e) {}
 }
 
+function deepCleanObject<T>(obj: T): T {
+  if (obj === null || obj === undefined) return obj as T;
+  if (Array.isArray(obj)) {
+    return obj.map(item => deepCleanObject(item)).filter(item => item !== undefined) as unknown as T;
+  }
+  if (typeof obj === 'object') {
+    const cleaned: any = {};
+    Object.keys(obj as Record<string, any>).forEach(key => {
+      const val = (obj as Record<string, any>)[key];
+      if (val !== undefined) {
+        cleaned[key] = deepCleanObject(val);
+      }
+    });
+    return cleaned as T;
+  }
+  return obj;
+}
+
 // Enquiries Operations
 export async function createEnquiry(enquiryData: Omit<Enquiry, 'id' | 'created_at'>): Promise<string> {
   const id = 'ENQ-' + Math.floor(100000 + Math.random() * 900000);
@@ -440,10 +460,52 @@ export async function createEnquiry(enquiryData: Omit<Enquiry, 'id' | 'created_a
   setLocalOverrides('enquiries', currentLocal);
 
   try {
+    const cleanedEnquiry = deepCleanObject(fullEnquiry);
     const docRef = doc(db, 'enquiries', id);
-    await setDoc(docRef, fullEnquiry);
+    await setDoc(docRef, cleanedEnquiry);
+    console.log('Successfully saved enquiry to Cloud Firestore:', id);
+
+    // Also mirror to unified salesOrders collection with channel: 'website'
+    try {
+      const salesOrderData = deepCleanObject({
+        id,
+        orderNumber: id,
+        channel: 'website',
+        customerName: enquiryData.name,
+        customerPhone: enquiryData.phone,
+        customerEmail: enquiryData.email || '',
+        deliveryAddress: enquiryData.address || '',
+        pincode: enquiryData.pincode || '',
+        name: enquiryData.name,
+        phone: enquiryData.phone,
+        email: enquiryData.email || '',
+        address: enquiryData.address || '',
+        customerId: enquiryData.name + ' (' + enquiryData.phone + ')',
+        orderDate: fullEnquiry.created_at,
+        status: 'enquiry',
+        items: (enquiryData.items || []).map((item: any) => ({
+          productId: item.id || item.name,
+          name: item.name || item.productId || 'Crackers Item',
+          quantity: Number(item.quantity || 1),
+          unitPrice: Number(item.price || item.unitPrice || 0),
+          price: Number(item.price || item.unitPrice || 0),
+          priceType: 'wholesale'
+        })),
+        totalAmount: enquiryData.grand_total,
+        amountPaid: 0,
+        paymentStatus: 'unpaid',
+        deliveryType: 'delivery',
+        locationId: 'loc_1',
+        notes: `Website direct enquiry checkout`
+      });
+      const salesOrderRef = doc(db, 'salesOrders', id);
+      await setDoc(salesOrderRef, salesOrderData);
+      console.log('Successfully saved salesOrder mirror to Cloud Firestore:', id);
+    } catch (err) {
+      console.error('Error saving salesOrder mirror to Firestore:', err);
+    }
   } catch (e) {
-    console.warn('Saved enquiry locally:', e);
+    console.error('Failed to save enquiry to Cloud Firestore:', e);
   }
 
   return id;
@@ -681,4 +743,66 @@ export async function logActivity(action: string, details: string, user_email: s
     console.warn('Activity log recorded:', details);
   }
 }
+
+// ==========================================
+// INVENTORY & ORDER MANAGEMENT HELPERS
+// ==========================================
+
+export function triggerCollectionUpdate(collectionName: string) {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(`cf_updated_${collectionName}`));
+  }
+}
+
+export function calculateProductStock(product: Product, stockLedger: StockLedgerEntry[] = []): number {
+  if (!product) return 0;
+  const pEntries = (stockLedger || []).filter(e => e.productId === product.id);
+  if (pEntries.length > 0) {
+    return pEntries.reduce((sum, e) => sum + (Number(e.quantity) || 0), 0);
+  }
+  if (product.currentStock !== undefined && product.currentStock !== null) {
+    return Number(product.currentStock);
+  }
+  return product.in_stock !== false ? 25 : 0;
+}
+
+export async function recalculateProductStock(productId: string): Promise<number> {
+  try {
+    const colRef = collection(db, 'stockLedger');
+    const snap = await getDocs(colRef);
+    let totalStock = 0;
+    let hasEntries = false;
+
+    snap.docs.forEach((d) => {
+      const data = d.data();
+      if (data.productId === productId) {
+        hasEntries = true;
+        totalStock += Number(data.quantity) || 0;
+      }
+    });
+
+    const finalStock = hasEntries ? totalStock : 25;
+    const productRef = doc(db, 'products', productId);
+    await updateDoc(productRef, {
+      currentStock: finalStock,
+      in_stock: finalStock > 0
+    });
+
+    triggerCollectionUpdate('products');
+    triggerCollectionUpdate('stockLedger');
+    return finalStock;
+  } catch (e) {
+    console.warn(`Local stock calculation for product ${productId}:`, e);
+    return 25;
+  }
+}
+
+export async function addStockLedgerEntry(entry: Omit<StockLedgerEntry, 'id'>): Promise<string> {
+  const colRef = collection(db, 'stockLedger');
+  const docRef = await addDoc(colRef, entry);
+  await recalculateProductStock(entry.productId);
+  triggerCollectionUpdate('stockLedger');
+  return docRef.id;
+}
+
 

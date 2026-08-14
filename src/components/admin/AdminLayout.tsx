@@ -15,7 +15,12 @@ import {
   Clock,
   Menu,
   X,
-  Award
+  Award,
+  Warehouse,
+  ShoppingBag,
+  AlertTriangle,
+  Zap,
+  Building2
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -84,6 +89,11 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     {
       title: 'OPERATIONS',
       items: [
+        { id: 'pos', label: 'Counter POS Billing', icon: Zap, badge: 'POS' },
+        { id: 'sales_orders', label: 'Sales Orders Pipeline', icon: ShoppingBag, badge: 'Orders' },
+        { id: 'alerts', label: 'Low Stock Alerts', icon: AlertTriangle, badge: 'Alerts' },
+        { id: 'inventory', label: 'Inventory & Stock', icon: Warehouse, badge: 'Stock' },
+        { id: 'vendors', label: 'Vendor Management', icon: Building2, badge: 'Suppliers' },
         { id: 'enquiries', label: 'Enquiries / Orders', icon: MessageSquare, count: pendingCount || counts.enquiries },
         { id: 'testimonials', label: 'Customer Reviews', icon: Award }
       ]

@@ -15,7 +15,7 @@ export function Catalog() {
   const [activeCat, setActiveCat] = useState('all');
 
   const activeProducts = (products && products.length > 0 ? products : DEFAULT_PRODUCTS)
-    .filter(p => p.active !== false && p.in_stock !== false);
+    .filter(p => p.active !== false);
 
   const activeCategories = (categories && categories.length > 0 ? categories : DEFAULT_CATEGORIES)
     .filter(c => c.active !== false)

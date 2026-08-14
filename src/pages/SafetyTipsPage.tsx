@@ -23,8 +23,8 @@ export function SafetyTipsPage() {
     return <BrandLoader variant="fullscreen" message="Loading Safety Guidelines..." />;
   }
 
-  const dos = content.tips.filter(t => t.type === 'do');
-  const donts = content.tips.filter(t => t.type === 'dont');
+  const dos = (content.tips || []).filter(t => t.type === 'do');
+  const donts = (content.tips || []).filter(t => t.type === 'dont');
 
   return (
     <div className="min-h-screen bg-ink-950 text-paper-50 font-sans antialiased selection:bg-gold-400 selection:text-ink-950">

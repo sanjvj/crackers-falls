@@ -77,12 +77,6 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
         </div>
         <p className="mt-2.5 flex-1 text-[13px] leading-relaxed text-paper-500 font-sans font-normal line-clamp-2">{product.description || 'Authentic Sivakasi direct fireworks.'}</p>
 
-        <div className="mt-5 text-[10.5px] uppercase tracking-[0.16em]">
-          <span className={`font-bold ${inStock ? 'text-leaf-400' : 'text-paper-500'}`}>
-            {inStock ? '● In stock' : '○ Restocking soon'}
-          </span>
-        </div>
-
         <div className="mt-4 flex items-end justify-between border-t border-paper-50/10 pt-4">
           <div>
             <p className="tnum text-[11.5px] text-paper-500 line-through font-normal">₹{mrp.toLocaleString('en-IN')}</p>

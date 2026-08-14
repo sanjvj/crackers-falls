@@ -34,6 +34,11 @@ import ReportsPage from '../components/admin/ReportsPage';
 import ExportDataPage from '../components/admin/ExportDataPage';
 import UsersRolesPage from '../components/admin/UsersRolesPage';
 import ActivityLogsPage from '../components/admin/ActivityLogsPage';
+import InventoryPage from '../components/admin/InventoryPage';
+import SalesOrdersPage from '../components/admin/SalesOrdersPage';
+import AlertsPage from '../components/admin/AlertsPage';
+import PosBillingPage from '../components/admin/PosBillingPage';
+import VendorsPage from '../components/admin/VendorsPage';
 import { BrandLoader } from '../components/BrandLoader';
 
 export const AdminPanel: React.FC = () => {
@@ -187,11 +192,26 @@ export const AdminPanel: React.FC = () => {
         <DashboardPage
           products={products}
           categories={categories}
-          enquiries={enquiries}
+          onNavigateTab={setActiveTab}
         />
       )}
       {activeTab === 'products' && (
         <ProductsPage products={products} categories={categories} />
+      )}
+      {activeTab === 'inventory' && (
+        <InventoryPage products={products} categories={categories} />
+      )}
+      {activeTab === 'pos' && (
+        <PosBillingPage products={products} />
+      )}
+      {activeTab === 'sales_orders' && (
+        <SalesOrdersPage products={products} />
+      )}
+      {activeTab === 'alerts' && (
+        <AlertsPage products={products} />
+      )}
+      {activeTab === 'vendors' && (
+        <VendorsPage />
       )}
       {activeTab === 'categories' && (
         <CategoriesPage categories={categories} />

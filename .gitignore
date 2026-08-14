@@ -34,3 +34,7 @@ build/
 # Firebase & build cache
 .firebase/
 *.tsbuildinfo
+
+# Functions build & dependencies
+functions/node_modules/
+functions/lib/

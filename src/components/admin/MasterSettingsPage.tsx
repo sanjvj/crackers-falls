@@ -225,12 +225,13 @@ export const MasterSettingsPage: React.FC<MasterSettingsPageProps> = ({
               />
             </div>
             <div>
-              <label className="block text-paper-300 font-bold text-xs mb-1">Festive Season Tag</label>
+              <label className="block text-paper-300 font-bold text-xs mb-1">Admin Business Email (Receives Enquiry PDFs) *</label>
               <input
-                type="text"
-                value={mSettings.season_year || '2026 Festive Season'}
-                onChange={(e) => setMSettings({ ...mSettings, season_year: e.target.value })}
-                className="w-full bg-ink-850 border border-paper-50/15 text-white px-4 py-3 rounded-2xl outline-none font-semibold text-xs focus:border-gold-400"
+                type="email"
+                required
+                value={mSettings.admin_notification_email || 'sanjaysurya3010@gmail.com'}
+                onChange={(e) => setMSettings({ ...mSettings, admin_notification_email: e.target.value })}
+                className="w-full bg-ink-850 border border-paper-50/15 text-white px-4 py-3 rounded-2xl outline-none font-semibold text-xs focus:border-gold-400 font-mono"
               />
             </div>
           </div>

@@ -24,6 +24,8 @@ import {
   DEFAULT_PRODUCTS,
   DEFAULT_CATEGORIES
 } from '../lib/firestore';
+import { db } from '../lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 import { validatePhone, validatePincode, validateEmail, sanitizeInput } from '../lib/validation';
 import type { Product, CategoryItem, Coupon, EnquiryItem } from '../types';
 import { EnquiryProvider, useEnquiry } from '../context/EnquiryContext';
@@ -59,7 +61,7 @@ function QuickEnquiryContent() {
   const [fireworksActive, setFireworksActive] = useState(false);
 
   const activeProducts = (products && products.length > 0 ? products : DEFAULT_PRODUCTS)
-    .filter(p => p.active !== false && p.in_stock !== false);
+    .filter(p => p.active !== false);
 
   const activeCategories = (categories && categories.length > 0 ? categories : DEFAULT_CATEGORIES)
     .filter(c => c.active !== false)
@@ -174,8 +176,8 @@ function QuickEnquiryContent() {
       return;
     }
 
-    if (cleanEmail && !validateEmail(cleanEmail)) {
-      setFormError('Please enter a valid email address.');
+    if (!cleanEmail || !validateEmail(cleanEmail)) {
+      setFormError('Please enter a valid email address (Required for confirmation PDF).');
       return;
     }
 
@@ -394,8 +396,8 @@ function QuickEnquiryContent() {
                                 }}
                               />
                               <div className="min-w-0">
-                                <span className="text-[10px] font-semibold text-gold-400 uppercase tracking-wider block">
-                                  {p.category} ({p.unit || 'Box'})
+                                <span className="text-[10px] font-semibold text-gold-400 uppercase tracking-wider flex items-center gap-2">
+                                  <span>{p.category} ({p.unit || 'Box'})</span>
                                 </span>
                                 <h4 className="text-sm font-semibold font-display text-paper-50 truncate">{p.name}</h4>
                                 <div className="flex items-baseline gap-2 mt-0.5">
@@ -423,7 +425,10 @@ function QuickEnquiryContent() {
                                   <span className="w-5 text-center font-bold text-gold-400 text-xs font-display">{qty}</span>
                                   <button
                                     type="button"
-                                    onClick={() => handleQuantityChange(p.id, 1)}
+                                    onClick={() => {
+                                      setFormError('');
+                                      handleQuantityChange(p.id, 1);
+                                    }}
                                     className="h-7 w-7 rounded-full bg-gold-400 text-ink-950 flex items-center justify-center font-bold transition-transform hover:scale-105 cursor-pointer"
                                     aria-label="Increase quantity"
                                   >
@@ -433,7 +438,10 @@ function QuickEnquiryContent() {
                               ) : (
                                 <button
                                   type="button"
-                                  onClick={() => handleQuantityChange(p.id, 1)}
+                                  onClick={() => {
+                                    setFormError('');
+                                    handleQuantityChange(p.id, 1);
+                                  }}
                                   className="h-9 px-4 rounded-full bg-ink-850 border border-paper-50/15 text-paper-200 hover:border-gold-400/50 hover:text-gold-300 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
                                 >
                                   <Plus size={14} />
@@ -603,7 +611,8 @@ function QuickEnquiryContent() {
                     />
                     <input
                       type="email"
-                      placeholder="Email Address"
+                      required
+                      placeholder="Email Address *"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="w-full bg-ink-850 border border-paper-50/15 text-white px-3.5 py-2.5 rounded-xl text-xs outline-none focus:border-gold-400/60 placeholder:text-paper-400"
