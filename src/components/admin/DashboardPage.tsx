@@ -162,7 +162,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       .sort((a, b) => b.qty - a.qty)
       .slice(0, 5);
 
-    return ranked.length > 0 ? ranked : products.slice(0, 5).map(p => ({ product: p, qty: 35 }));
+    return ranked.length > 0 ? ranked : products.slice(0, 5).map(p => ({ product: p, qty: 0 }));
   }, [salesOrders, products]);
 
   // -----------------------------------------------------------------------------------------------

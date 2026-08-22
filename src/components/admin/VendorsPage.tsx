@@ -18,6 +18,7 @@ import {
   Building
 } from 'lucide-react';
 import { useFirestoreCollection } from '../../hooks/useFirestore';
+import { saveVendor, deleteVendor } from '../../lib/firestore';
 import { db } from '../../lib/firebase';
 import { collection, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import type { Vendor, PurchaseOrder, Product } from '../../types';
@@ -102,7 +103,7 @@ export const VendorsPage: React.FC = () => {
         createdAt: editingVendor ? editingVendor.createdAt : new Date().toISOString()
       };
 
-      await setDoc(doc(db, 'vendors', vendorId), vendorDoc);
+      await saveVendor(vendorDoc);
       setIsAddModalOpen(false);
       setEditingVendor(null);
     } catch (err) {
@@ -117,7 +118,7 @@ export const VendorsPage: React.FC = () => {
   const handleDeleteVendor = async (vendorId: string, vendorName: string) => {
     if (!window.confirm(`Are you sure you want to delete vendor "${vendorName}"?`)) return;
     try {
-      await deleteDoc(doc(db, 'vendors', vendorId));
+      await deleteVendor(vendorId);
     } catch (err) {
       console.error('Delete Vendor Error:', err);
     }

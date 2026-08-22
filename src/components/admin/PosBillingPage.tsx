@@ -16,7 +16,7 @@ import {
   ShoppingBag
 } from 'lucide-react';
 import { useFirestoreCollection } from '../../hooks/useFirestore';
-import { addStockLedgerEntry, recalculateProductStock, calculateProductStock } from '../../lib/firestore';
+import { addStockLedgerEntry, recalculateProductStock, calculateProductStock, saveSalesOrder } from '../../lib/firestore';
 import { db } from '../../lib/firebase';
 import { collection, doc, setDoc } from 'firebase/firestore';
 import { generateThermalReceiptPDF } from '../../lib/thermalBillGenerator';
@@ -163,7 +163,7 @@ export const PosBillingPage: React.FC<PosBillingPageProps> = ({ products: initia
         notes: `In-Person Counter POS Billing (${paymentMethod.toUpperCase()})`
       };
 
-      await setDoc(doc(db, 'salesOrders', orderId), newOrder);
+      await saveSalesOrder(newOrder);
 
       // 2. Write Stock Ledger entries for line items
       for (const item of cart) {

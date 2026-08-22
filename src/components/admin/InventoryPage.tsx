@@ -20,7 +20,7 @@ import {
   FileText
 } from 'lucide-react';
 import { useFirestoreCollection } from '../../hooks/useFirestore';
-import { addStockLedgerEntry, recalculateProductStock, calculateProductStock } from '../../lib/firestore';
+import { addStockLedgerEntry, recalculateProductStock, calculateProductStock, saveProduct, deleteProduct } from '../../lib/firestore';
 import { db } from '../../lib/firebase';
 import { collection, addDoc, doc, setDoc, writeBatch } from 'firebase/firestore';
 import type {
@@ -187,7 +187,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
         sortOrder: products.length
       };
 
-      await setDoc(doc(db, 'products', prodId), newDoc);
+      await saveProduct(newDoc);
 
       // Create initial stock ledger entry if initial stock provided
       if (newProdInitialStock > 0) {

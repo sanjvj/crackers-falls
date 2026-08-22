@@ -153,3 +153,175 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+/* ==========================================================================
+   ADMIN LIGHT MODE THEME OVERRIDES (Admin Panel Only)
+   ========================================================================== */
+.admin-light-theme {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+.admin-light-theme header {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+.admin-light-theme main {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+.admin-light-theme .bg-ink-950,
+.admin-light-theme .bg-night-950,
+.admin-light-theme .bg-night-900,
+.admin-light-theme .bg-zinc-950,
+.admin-light-theme .bg-zinc-900,
+.admin-light-theme .bg-slate-900 {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+}
+
+.admin-light-theme .bg-ink-900,
+.admin-light-theme .bg-ink-850,
+.admin-light-theme .bg-ink-800 {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+}
+
+.admin-light-theme .bg-ink-800\/50,
+.admin-light-theme .bg-ink-900\/50,
+.admin-light-theme .bg-slate-900\/50,
+.admin-light-theme .bg-slate-800\/50,
+.admin-light-theme .bg-night-900\/50 {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+.admin-light-theme .text-white,
+.admin-light-theme .text-paper-50,
+.admin-light-theme .text-paper-100,
+.admin-light-theme .text-slate-100,
+.admin-light-theme .text-slate-200,
+.admin-light-theme .text-zinc-100 {
+  color: #0f172a !important;
+}
+
+.admin-light-theme .text-paper-300,
+.admin-light-theme .text-paper-400,
+.admin-light-theme .text-paper-500,
+.admin-light-theme .text-slate-300,
+.admin-light-theme .text-slate-400,
+.admin-light-theme .text-zinc-400 {
+  color: #475569 !important;
+}
+
+.admin-light-theme .border-paper-50\/10,
+.admin-light-theme .border-paper-50\/20,
+.admin-light-theme .border-white\/10,
+.admin-light-theme .border-white\/20,
+.admin-light-theme .border-slate-800,
+.admin-light-theme .border-zinc-800 {
+  border-color: #cbd5e1 !important;
+}
+
+.admin-light-theme input,
+.admin-light-theme select,
+.admin-light-theme textarea {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+.admin-light-theme input::placeholder,
+.admin-light-theme textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+.admin-light-theme table tr {
+  border-color: #e2e8f0 !important;
+}
+
+.admin-light-theme table th {
+  background-color: #f8fafc !important;
+  color: #334155 !important;
+  border-color: #e2e8f0 !important;
+}
+
+.admin-light-theme table td {
+  color: #0f172a !important;
+  border-color: #f1f5f9 !important;
+}
+
+.admin-light-theme .text-gold-400 {
+  color: #b45309 !important;
+}
+
+.admin-light-theme .bg-gold-400\/10,
+.admin-light-theme .bg-gold-400\/20 {
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+}
+
+/* Sidebar High-Visibility Light Mode Overrides */
+.admin-light-theme aside {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.05);
+}
+
+.admin-light-theme aside h2 {
+  color: #b45309 !important;
+}
+
+.admin-light-theme aside p {
+  color: #64748b !important;
+}
+
+.admin-light-theme aside button {
+  color: #334155 !important;
+}
+
+.admin-light-theme aside button:hover {
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+}
+
+.admin-light-theme aside button.bg-gold-400 {
+  background-color: #d97706 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3) !important;
+}
+
+.admin-light-theme aside div.bg-ink-950 {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* High-Contrast Light Mode Filter Pills (Products & Enquiries Filter Bars) */
+.admin-light-theme .no-scrollbar button,
+.admin-light-theme .overflow-x-auto button {
+  background-color: #ffffff !important;
+  color: #334155 !important;
+  border-color: #cbd5e1 !important;
+  font-weight: 700 !important;
+}
+
+.admin-light-theme .no-scrollbar button:hover,
+.admin-light-theme .overflow-x-auto button:hover {
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+  border-color: #f59e0b !important;
+}
+
+.admin-light-theme .no-scrollbar button.bg-gold-400,
+.admin-light-theme .overflow-x-auto button.bg-gold-400 {
+  background-color: #d97706 !important;
+  color: #ffffff !important;
+  border-color: #d97706 !important;
+  box-shadow: 0 4px 14px rgba(217, 119, 6, 0.35) !important;
+}

@@ -25,7 +25,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { useFirestoreCollection } from '../../hooks/useFirestore';
-import { addStockLedgerEntry, recalculateProductStock } from '../../lib/firestore';
+import { addStockLedgerEntry, recalculateProductStock, saveSalesOrder } from '../../lib/firestore';
 import { db } from '../../lib/firebase';
 import { collection, addDoc, doc, setDoc, updateDoc, getDoc } from 'firebase/firestore';
 import type {
@@ -264,8 +264,8 @@ export const SalesOrdersPage: React.FC<SalesOrdersPageProps> = ({ products: init
         : 'unpaid';
 
       // 1. Update salesOrder status to 'confirmed'
-      const orderRef = doc(db, 'salesOrders', selectedEnquiry.id);
-      await updateDoc(orderRef, {
+      await saveSalesOrder({
+        ...selectedEnquiry,
         status: 'confirmed',
         items: confirmedItems,
         totalAmount: newTotal,
@@ -368,7 +368,7 @@ export const SalesOrdersPage: React.FC<SalesOrdersPageProps> = ({ products: init
         notes: saleNotes
       };
 
-      await setDoc(doc(db, 'salesOrders', orderId), newOrder);
+      await saveSalesOrder(newOrder);
 
       // Write Stock Ledger entries for each line item
       for (const item of lineItems) {
@@ -610,7 +610,7 @@ export const SalesOrdersPage: React.FC<SalesOrdersPageProps> = ({ products: init
                           )}
                           {order.status === 'pending' && (
                             <button
-                              onClick={() => updateDoc(doc(db, 'salesOrders', order.id), { status: 'confirmed' })}
+                              onClick={() => saveSalesOrder({ ...order, status: 'confirmed' })}
                               className="px-3 py-1 bg-sky-500/20 text-sky-400 hover:bg-sky-500/30 border border-sky-500/40 rounded-lg text-[10px] font-bold uppercase cursor-pointer"
                             >
                               Confirm
@@ -618,7 +618,7 @@ export const SalesOrdersPage: React.FC<SalesOrdersPageProps> = ({ products: init
                           )}
                           {order.status === 'confirmed' && (
                             <button
-                              onClick={() => updateDoc(doc(db, 'salesOrders', order.id), { status: 'packed' })}
+                              onClick={() => saveSalesOrder({ ...order, status: 'packed' })}
                               className="px-3 py-1 bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 border border-indigo-500/40 rounded-lg text-[10px] font-bold uppercase cursor-pointer"
                             >
                               Pack
@@ -626,7 +626,7 @@ export const SalesOrdersPage: React.FC<SalesOrdersPageProps> = ({ products: init
                           )}
                           {order.status === 'packed' && (
                             <button
-                              onClick={() => updateDoc(doc(db, 'salesOrders', order.id), { status: 'dispatched' })}
+                              onClick={() => saveSalesOrder({ ...order, status: 'dispatched' })}
                               className="px-3 py-1 bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 border border-purple-500/40 rounded-lg text-[10px] font-bold uppercase cursor-pointer"
                             >
                               Dispatch
@@ -634,7 +634,7 @@ export const SalesOrdersPage: React.FC<SalesOrdersPageProps> = ({ products: init
                           )}
                           {order.status === 'dispatched' && (
                             <button
-                              onClick={() => updateDoc(doc(db, 'salesOrders', order.id), { status: 'delivered' })}
+                              onClick={() => saveSalesOrder({ ...order, status: 'delivered' })}
                               className="px-3 py-1 bg-leaf-400/20 text-leaf-400 hover:bg-leaf-400/30 border border-leaf-400/40 rounded-lg text-[10px] font-bold uppercase cursor-pointer"
                             >
                               Deliver

@@ -20,7 +20,9 @@ import {
   ShoppingBag,
   AlertTriangle,
   Zap,
-  Building2
+  Building2,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -56,6 +58,20 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   children
 }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('cf_admin_theme') as 'dark' | 'light') || 'dark';
+    }
+    return 'dark';
+  });
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('cf_admin_theme', nextTheme);
+    }
+  };
 
   const displayEmail = adminEmail || user?.email || 'admin@crackersfalls.in';
   const displayRole = adminRole || role || 'Super Admin';
@@ -109,7 +125,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   ];
 
   return (
-    <div className="flex h-screen bg-ink-950 text-paper-50 overflow-hidden font-sans selection:bg-gold-400 selection:text-ink-950">
+    <div className={`flex h-screen overflow-hidden font-sans selection:bg-gold-400 selection:text-ink-950 ${
+      theme === 'light' ? 'admin-light-theme bg-slate-100 text-slate-900' : 'bg-ink-950 text-paper-50'
+    }`}>
       {/* Mobile Backdrop */}
       {mobileOpen && (
         <div
@@ -120,7 +138,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-[270px] bg-ink-900 border-r border-paper-50/10 text-white flex flex-col transform transition-transform duration-300 lg:relative lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-[270px] ${
+          theme === 'light' ? 'bg-slate-900 border-r border-slate-700 text-white' : 'bg-ink-900 border-r border-paper-50/10 text-white'
+        } flex flex-col transform transition-transform duration-300 lg:relative lg:translate-x-0 ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -224,7 +244,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Top Bar Header */}
-        <header className="bg-ink-900 border-b border-paper-50/10 h-16 flex items-center justify-between px-4 sm:px-6 shrink-0">
+        <header className={`${
+          theme === 'light' ? 'bg-white border-b border-slate-200 text-slate-900 shadow-sm' : 'bg-ink-900 border-b border-paper-50/10 text-white'
+        } h-16 flex items-center justify-between px-4 sm:px-6 shrink-0`}>
           <div className="flex items-center gap-3">
             <button className="lg:hidden text-paper-300 cursor-pointer" onClick={() => setMobileOpen(true)}>
               <Menu size={22} />
@@ -233,7 +255,11 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
               href="/"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-xs font-bold text-gold-400 bg-ink-850 border border-gold-400/30 rounded-full px-4 py-2 hover:bg-gold-400 hover:text-ink-950 transition-all cursor-pointer shadow-sm"
+              className={`flex items-center gap-2 text-xs font-bold ${
+                theme === 'light'
+                  ? 'text-amber-700 bg-amber-50 border border-amber-300/80 hover:bg-amber-100'
+                  : 'text-gold-400 bg-ink-850 border border-gold-400/30 hover:bg-gold-400 hover:text-ink-950'
+              } rounded-full px-4 py-2 transition-all cursor-pointer shadow-sm`}
             >
               <ExternalLink size={14} />
               <span>View Live Website</span>
@@ -241,15 +267,44 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           </div>
 
           <div className="flex items-center gap-4 text-xs font-bold">
-            <div className="hidden sm:flex items-center gap-2 text-leaf-400 bg-teal-900/30 border border-leaf-400/30 px-3.5 py-1.5 rounded-full">
-              <span className="h-2 w-2 rounded-full bg-leaf-400 animate-pulse" />
-              <span>Sivakasi Direct Admin Control Active</span>
+            {/* Theme Switcher Toggle */}
+            <button
+              onClick={toggleTheme}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border shadow-sm ${
+                theme === 'light'
+                  ? 'bg-slate-100 text-slate-800 border-slate-300 hover:bg-slate-200'
+                  : 'bg-ink-850 text-gold-300 border-gold-400/30 hover:bg-gold-400/20'
+              }`}
+              title="Switch Admin Theme (Light / Dark)"
+            >
+              {theme === 'light' ? (
+                <>
+                  <Sun size={15} className="text-amber-500 shrink-0" />
+                  <span>Light Theme</span>
+                </>
+              ) : (
+                <>
+                  <Moon size={15} className="text-gold-400 shrink-0" />
+                  <span>Dark Theme</span>
+                </>
+              )}
+            </button>
+
+            <div className={`hidden sm:flex items-center gap-2 ${
+              theme === 'light'
+                ? 'text-emerald-700 bg-emerald-50 border border-emerald-300'
+                : 'text-leaf-400 bg-teal-900/30 border border-leaf-400/30'
+            } px-3.5 py-1.5 rounded-full`}>
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Sivakasi Direct Admin Control</span>
             </div>
           </div>
         </header>
 
         {/* Content View */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 bg-ink-950 custom-scrollbar">
+        <main className={`flex-1 overflow-y-auto p-4 sm:p-6 ${
+          theme === 'light' ? 'bg-slate-100 text-slate-900' : 'bg-ink-950 text-paper-50'
+        } custom-scrollbar`}>
           {children}
         </main>
       </div>

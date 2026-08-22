@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { useFirestoreCollection } from '../../hooks/useFirestore';
 import { db } from '../../lib/firebase';
-import { calculateProductStock, addStockLedgerEntry, recalculateProductStock, triggerCollectionUpdate } from '../../lib/firestore';
+import { calculateProductStock, addStockLedgerEntry, recalculateProductStock, triggerCollectionUpdate, savePurchaseOrder } from '../../lib/firestore';
 import { collection, addDoc, doc, setDoc } from 'firebase/firestore';
 import type {
   Product,
@@ -120,7 +120,7 @@ export const AlertsPage: React.FC<AlertsPageProps> = ({ products: initialProduct
         notes: poNotes || `Direct stock replenishment for ${selectedProductForPO.name}`
       };
 
-      await setDoc(doc(db, 'purchaseOrders', poId), newPO);
+      await savePurchaseOrder(newPO);
 
       // 2. Add Stock Ledger entry
       await addStockLedgerEntry({

@@ -24,7 +24,11 @@ import type {
   SafetyTipsContent,
   AboutPageContent,
   ContactPageContent,
-  StockLedgerEntry
+  StockLedgerEntry,
+  SalesOrder,
+  Vendor,
+  PurchaseOrder,
+  Customer
 } from '../types';
 
 // Default initial fallbacks
@@ -332,6 +336,7 @@ export async function fetchProducts(): Promise<Product[]> {
 export async function saveProduct(product: Partial<Product> & { name: string }): Promise<string> {
   const id = product.id || 'prod_' + Date.now();
   const fullData: Product = {
+    ...product,
     id,
     name: product.name,
     category: product.category || 'Sparklers',
@@ -346,20 +351,23 @@ export async function saveProduct(product: Partial<Product> & { name: string }):
     sortOrder: product.sortOrder ?? 0
   };
 
+  const cleaned = deepCleanObject(fullData);
+
   // 1. Update local storage overrides
   const currentLocal = getLocalOverrides<Product>('products') || await fetchProducts();
   const existingIndex = currentLocal.findIndex(p => p.id === id);
   if (existingIndex >= 0) {
-    currentLocal[existingIndex] = fullData;
+    currentLocal[existingIndex] = cleaned;
   } else {
-    currentLocal.push(fullData);
+    currentLocal.push(cleaned);
   }
   setLocalOverrides('products', currentLocal);
 
   // 2. Try Firestore write
   try {
     const docRef = doc(db, 'products', id);
-    await setDoc(docRef, fullData, { merge: true });
+    await setDoc(docRef, cleaned, { merge: true });
+    triggerCollectionUpdate('products');
   } catch (e) {
     console.warn('Saved product locally due to Firestore write error:', e);
   }
@@ -798,11 +806,168 @@ export async function recalculateProductStock(productId: string): Promise<number
 }
 
 export async function addStockLedgerEntry(entry: Omit<StockLedgerEntry, 'id'>): Promise<string> {
-  const colRef = collection(db, 'stockLedger');
-  const docRef = await addDoc(colRef, entry);
-  await recalculateProductStock(entry.productId);
-  triggerCollectionUpdate('stockLedger');
-  return docRef.id;
+  const id = 'stk_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+  const fullEntry: StockLedgerEntry = { ...entry, id };
+  const cleaned = deepCleanObject(fullEntry);
+
+  const currentLocal = getLocalOverrides<StockLedgerEntry>('stockLedger') || [];
+  currentLocal.unshift(cleaned);
+  setLocalOverrides('stockLedger', currentLocal);
+
+  try {
+    const docRef = doc(db, 'stockLedger', id);
+    await setDoc(docRef, cleaned);
+    await recalculateProductStock(entry.productId);
+    triggerCollectionUpdate('stockLedger');
+  } catch (e) {
+    console.warn('Saved stock ledger entry locally:', e);
+  }
+
+  return id;
+}
+
+// Sales Orders CRUD
+export async function fetchSalesOrders(): Promise<SalesOrder[]> {
+  return fetchCollection<SalesOrder>('salesOrders');
+}
+
+export async function saveSalesOrder(order: SalesOrder): Promise<string> {
+  const cleaned = deepCleanObject(order);
+  const currentLocal = getLocalOverrides<SalesOrder>('salesOrders') || await fetchSalesOrders();
+  const idx = currentLocal.findIndex(o => o.id === order.id);
+  if (idx >= 0) {
+    currentLocal[idx] = cleaned;
+  } else {
+    currentLocal.unshift(cleaned);
+  }
+  setLocalOverrides('salesOrders', currentLocal);
+
+  try {
+    const docRef = doc(db, 'salesOrders', order.id);
+    await setDoc(docRef, cleaned, { merge: true });
+    triggerCollectionUpdate('salesOrders');
+    logActivity(
+      order.channel === 'in-person' ? 'POS Counter Billing' : 'Sales Order Update',
+      `Order #${order.id} (Customer ID: ${order.customerId || 'Counter'}) - ${order.status.toUpperCase()} (Total: ₹${order.totalAmount || 0})`,
+      'ajsolutionsmd@gmail.com'
+    );
+  } catch (e) {
+    console.warn(`Saved salesOrder ${order.id} locally:`, e);
+  }
+
+  return order.id;
+}
+
+export async function deleteSalesOrder(id: string): Promise<void> {
+  const currentLocal = (getLocalOverrides<SalesOrder>('salesOrders') || await fetchSalesOrders()).filter(o => o.id !== id);
+  setLocalOverrides('salesOrders', currentLocal);
+  try {
+    await deleteDoc(doc(db, 'salesOrders', id));
+    triggerCollectionUpdate('salesOrders');
+    logActivity('Delete Sales Order', `Deleted Sales Order #${id}`, 'ajsolutionsmd@gmail.com');
+  } catch (e) {}
+}
+
+// Vendors CRUD
+export async function fetchVendors(): Promise<Vendor[]> {
+  return fetchCollection<Vendor>('vendors');
+}
+
+export async function saveVendor(vendor: Vendor): Promise<string> {
+  const cleaned = deepCleanObject(vendor);
+  const currentLocal = getLocalOverrides<Vendor>('vendors') || await fetchVendors();
+  const idx = currentLocal.findIndex(v => v.id === vendor.id);
+  if (idx >= 0) {
+    currentLocal[idx] = cleaned;
+  } else {
+    currentLocal.unshift(cleaned);
+  }
+  setLocalOverrides('vendors', currentLocal);
+
+  try {
+    const docRef = doc(db, 'vendors', vendor.id);
+    await setDoc(docRef, cleaned, { merge: true });
+    triggerCollectionUpdate('vendors');
+    logActivity('Vendor Management', `Saved Vendor "${vendor.name}" (${vendor.phone || 'No phone'})`, 'ajsolutionsmd@gmail.com');
+  } catch (e) {
+    console.warn(`Saved vendor ${vendor.id} locally:`, e);
+  }
+
+  return vendor.id;
+}
+
+export async function deleteVendor(id: string): Promise<void> {
+  const currentLocal = (getLocalOverrides<Vendor>('vendors') || await fetchVendors()).filter(v => v.id !== id);
+  setLocalOverrides('vendors', currentLocal);
+  try {
+    await deleteDoc(doc(db, 'vendors', id));
+    triggerCollectionUpdate('vendors');
+    logActivity('Delete Vendor', `Deleted Vendor ID #${id}`, 'ajsolutionsmd@gmail.com');
+  } catch (e) {}
+}
+
+// Purchase Orders CRUD
+export async function fetchPurchaseOrders(): Promise<PurchaseOrder[]> {
+  return fetchCollection<PurchaseOrder>('purchaseOrders');
+}
+
+export async function savePurchaseOrder(po: PurchaseOrder): Promise<string> {
+  const cleaned = deepCleanObject(po);
+  const currentLocal = getLocalOverrides<PurchaseOrder>('purchaseOrders') || await fetchPurchaseOrders();
+  const idx = currentLocal.findIndex(p => p.id === po.id);
+  if (idx >= 0) {
+    currentLocal[idx] = cleaned;
+  } else {
+    currentLocal.unshift(cleaned);
+  }
+  setLocalOverrides('purchaseOrders', currentLocal);
+
+  try {
+    const docRef = doc(db, 'purchaseOrders', po.id);
+    await setDoc(docRef, cleaned, { merge: true });
+    triggerCollectionUpdate('purchaseOrders');
+    logActivity('Purchase Order Restock', `Issued PO #${po.id} to Vendor ID #${po.vendorId} (Total: ₹${po.totalAmount || 0})`, 'ajsolutionsmd@gmail.com');
+  } catch (e) {
+    console.warn(`Saved purchaseOrder ${po.id} locally:`, e);
+  }
+
+  return po.id;
+}
+
+export async function deletePurchaseOrder(id: string): Promise<void> {
+  const currentLocal = (getLocalOverrides<PurchaseOrder>('purchaseOrders') || await fetchPurchaseOrders()).filter(p => p.id !== id);
+  setLocalOverrides('purchaseOrders', currentLocal);
+  try {
+    await deleteDoc(doc(db, 'purchaseOrders', id));
+    triggerCollectionUpdate('purchaseOrders');
+  } catch (e) {}
+}
+
+// Customers CRUD
+export async function fetchCustomers(): Promise<Customer[]> {
+  return fetchCollection<Customer>('customers');
+}
+
+export async function saveCustomer(customer: Customer): Promise<string> {
+  const cleaned = deepCleanObject(customer);
+  const currentLocal = getLocalOverrides<Customer>('customers') || await fetchCustomers();
+  const idx = currentLocal.findIndex(c => c.id === customer.id);
+  if (idx >= 0) {
+    currentLocal[idx] = cleaned;
+  } else {
+    currentLocal.unshift(cleaned);
+  }
+  setLocalOverrides('customers', currentLocal);
+
+  try {
+    const docRef = doc(db, 'customers', customer.id);
+    await setDoc(docRef, cleaned, { merge: true });
+    triggerCollectionUpdate('customers');
+  } catch (e) {
+    console.warn(`Saved customer ${customer.id} locally:`, e);
+  }
+
+  return customer.id;
 }
 
 

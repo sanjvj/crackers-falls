@@ -290,3 +290,11 @@ export interface ContactPageContent {
   google_maps_url?: string;
   google_map_embed?: string;
 }
+
+export interface ActivityLogItem {
+  id?: string;
+  action: string;
+  details: string;
+  user_email: string;
+  timestamp: string;
+}

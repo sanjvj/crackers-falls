@@ -2,7 +2,18 @@ import { useState, useEffect } from 'react';
 import { subscribeCollection, subscribeSiteContentDoc } from '../lib/firestore';
 
 export function useFirestoreCollection<T>(collectionName: string, fallback: T[] = []) {
-  const [data, setData] = useState<T[]>(fallback);
+  const [data, setData] = useState<T[]>(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const raw = localStorage.getItem(`cf_override_${collectionName}`);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      }
+    } catch (e) {}
+    return fallback;
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,6 +30,8 @@ export function useFirestoreCollection<T>(collectionName: string, fallback: T[] 
           setData(items);
         } else if (fallback && fallback.length > 0) {
           setData(fallback);
+        } else {
+          setData([]);
         }
         setLoading(false);
       }
@@ -29,7 +42,7 @@ export function useFirestoreCollection<T>(collectionName: string, fallback: T[] 
       clearTimeout(timer);
       unsub();
     };
-  }, [collectionName, fallback]);
+  }, [collectionName]);
 
   return { data, setData, loading };
 }
